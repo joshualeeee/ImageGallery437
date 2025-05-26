@@ -1,11 +1,13 @@
 import { useParams } from "react-router";
-import type { IImageData } from "../MockAppData.ts";
+import type { IApiImageData } from "csc437-monorepo-backend/src/common/ApiImageData";
+import { ImageNameEditor } from "./ImageNameEditor";
 
 interface ImageDetailsProps {
-  images: IImageData[];
+  images: IApiImageData[];
+  setImages: (images: IApiImageData[]) => void;
 }
 
-export function ImageDetails({ images }: ImageDetailsProps) {
+export function ImageDetails({ images, setImages }: ImageDetailsProps) {
   const { imageId } = useParams();
   const image = images.find((image) => image.id === imageId);
   if (!image) {
@@ -19,6 +21,12 @@ export function ImageDetails({ images }: ImageDetailsProps) {
   return (
     <>
       <h2>{image.name}</h2>
+      <ImageNameEditor
+        initialValue={image.name}
+        imageId={image.id}
+        images={images}
+        setImages={setImages}
+      />
       <p>By {image.author.username}</p>
       <img className="ImageDetails-img" src={image.src} alt={image.name} />
     </>
