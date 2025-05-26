@@ -1,14 +1,15 @@
-import { useState } from "react";
-import { MainLayout } from "../MainLayout.tsx";
-import { fetchDataFromServer } from "../MockAppData.ts";
 import { ImageGrid } from "./ImageGrid.tsx";
+import type { IImageData } from "../MockAppData.ts";
 
-export function AllImages() {
-    const [imageData, _setImageData] = useState(fetchDataFromServer);
-    return (
-        <MainLayout>
-            <h2>All Images</h2>
-            <ImageGrid images={imageData} />
-        </MainLayout>
-    );
+interface AllImagesProps {
+  images: IImageData[];
+}
+
+export function AllImages({ images }: AllImagesProps) {
+  return (
+    <>
+      <h2>All Images</h2>
+      <ImageGrid images={images} />
+    </>
+  );
 }
