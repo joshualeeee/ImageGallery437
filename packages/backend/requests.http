@@ -15,9 +15,32 @@ GET http://localhost:3000/api/images/search?q=cat
 Accept: application/json
 
 ### Update image name
-PATCH http://localhost:3000/api/images/123
+PUT http://localhost:3000/api/images/683a00521ee8573c5a278350
 Content-Type: application/json
 
 {
-    "name": "New Image Name"
+    "name": "Chickenss"
+}
+
+### Test 1: Missing name (400 Bad Request)
+PUT http://localhost:3000/api/images/123
+Content-Type: application/json
+
+{
+}
+
+### Test 2: Name too long (422 Unprocessable Entity)
+PUT http://localhost:3000/api/images/123
+Content-Type: application/json
+
+{
+    "name": "afksdjfkjaskdlfjlkasjdklfjlkasjdkfjsalkdjfklsajdklfjkajweiofjoiajsdkfjioawjeoifjakosjdfiojawiojefkojsdkf"
+}
+
+### Test 3: Invalid ObjectId (404 Not Found)
+PUT http://localhost:3000/api/images/invalid-id-format
+Content-Type: application/json
+
+{
+    "name": "Valid Name"
 }
