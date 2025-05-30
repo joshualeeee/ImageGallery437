@@ -1,5 +1,8 @@
 import express, { RequestHandler } from "express";
 import { ImageProvider } from "../imageProvider";
+import { ObjectId } from "mongodb";
+
+const MAX_NAME_LENGTH = 100;
 
 export function registerImageRoutes(router: express.Router, imageProvider: ImageProvider) {
     const getAllImages: RequestHandler = async (req, res, next) => {
@@ -28,15 +31,40 @@ export function registerImageRoutes(router: express.Router, imageProvider: Image
             const { imageId } = req.params;
             const { name } = req.body;
 
+            // Check if name is provided
             if (!name) {
-                res.status(400).json({ error: 'Name is required' });
+                res.status(400).json({
+                    error: "Bad Request",
+                    message: "Image name is required"
+                });
+                return;
+            }
+
+            // Check if name is too long
+            if (name.length > MAX_NAME_LENGTH) {
+                res.status(422).json({
+                    error: "Unprocessable Entity",
+                    message: `Image name exceeds ${MAX_NAME_LENGTH} characters`
+                });
+                return;
+            }
+
+            // Check if ID is valid
+            if (!ObjectId.isValid(imageId)) {
+                res.status(404).json({
+                    error: "Not Found",
+                    message: "Image does not exist"
+                });
                 return;
             }
 
             const matchedCount = await imageProvider.updateImageName(imageId, name);
             
             if (matchedCount === 0) {
-                res.status(404).json({ error: 'Image not found' });
+                res.status(404).json({
+                    error: "Not Found",
+                    message: "Image does not exist"
+                });
                 return;
             }
 
