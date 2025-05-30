@@ -16,9 +16,8 @@ const app = express();
 app.use(express.static(STATIC_DIR));
 app.use(express.json());
 
-const router = express.Router();
-registerImageRoutes(router, imageProvider);
-app.use('/', router);
+// Register image routes directly on the app
+registerImageRoutes(app, imageProvider);
 
 app.get("/api/hello", (req, res) => {
     res.send("Hello, World");

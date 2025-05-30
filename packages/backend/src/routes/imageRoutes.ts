@@ -1,11 +1,11 @@
-import express, { RequestHandler } from "express";
+import express from "express";
 import { ImageProvider } from "../imageProvider";
 import { ObjectId } from "mongodb";
 
 const MAX_NAME_LENGTH = 100;
 
-export function registerImageRoutes(router: express.Router, imageProvider: ImageProvider) {
-    const getAllImages: RequestHandler = async (req, res, next) => {
+export function registerImageRoutes(app: express.Application, imageProvider: ImageProvider) {
+    app.get("/api/images", async (req, res, next) => {
         try {
             const searchQuery = req.query.q as string | undefined;
             const images = await imageProvider.getAllImagesWithAuthors(searchQuery);
@@ -13,9 +13,9 @@ export function registerImageRoutes(router: express.Router, imageProvider: Image
         } catch (error) {
             next(error);
         }
-    };
+    });
 
-    const searchImages: RequestHandler = async (req, res, next) => {
+    app.get("/api/images/search", async (req, res, next) => {
         try {
             const searchQuery = req.query.q as string;
             console.log('Search query:', searchQuery);
@@ -24,9 +24,9 @@ export function registerImageRoutes(router: express.Router, imageProvider: Image
         } catch (error) {
             next(error);
         }
-    };
+    });
 
-    const updateImageName: RequestHandler = async (req, res, next) => {
+    app.put("/api/images/:imageId", async (req, res, next) => {
         try {
             const { imageId } = req.params;
             const { name } = req.body;
@@ -72,9 +72,5 @@ export function registerImageRoutes(router: express.Router, imageProvider: Image
         } catch (error) {
             next(error);
         }
-    };
-
-    router.get("/api/images", getAllImages);
-    router.get("/api/images/search", searchImages);
-    router.put("/api/images/:imageId", updateImageName);
+    });
 }
