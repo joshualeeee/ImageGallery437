@@ -57,7 +57,8 @@ export function registerImageRoutes(app: express.Application, imageProvider: Ima
                 });
                 return;
             }
-
+            
+            console.log('Search query:', name, imageId);
             const matchedCount = await imageProvider.updateImageName(imageId, name);
             
             if (matchedCount === 0) {

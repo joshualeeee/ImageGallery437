@@ -74,6 +74,7 @@ export class ImageProvider {
                 }
             }
         );
+        console.log('Return: ', result.matchedCount);
         return result.matchedCount;
     }
 }

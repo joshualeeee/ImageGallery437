@@ -15,11 +15,11 @@ GET http://localhost:3000/api/images/search?q=cat
 Accept: application/json
 
 ### Update image name
-PUT http://localhost:3000/api/images/683a00521ee8573c5a278350
+PUT http://localhost:3000/api/images/683a00521ee8573c5a27834e
 Content-Type: application/json
 
 {
-    "name": "Chickenss"
+    "name": "Shiba!"
 }
 
 ### Test 1: Missing name (400 Bad Request)
