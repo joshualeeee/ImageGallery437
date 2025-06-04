@@ -19,10 +19,24 @@ export function ImageNameEditor(props: INameEditorProps) {
     setError(null);
 
     try {
-      // Simulate API call by fetching current data
-      const response = await fetch("/api/images");
+      const response = await fetch(`/api/images/${props.imageId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: input }),
+      });
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 400) {
+          throw new Error("Image name is required");
+        } else if (response.status === 422) {
+          throw new Error("Image name is too long");
+        } else if (response.status === 404) {
+          throw new Error("Image not found");
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       }
 
       // Update the images array with the new name
@@ -33,7 +47,11 @@ export function ImageNameEditor(props: INameEditorProps) {
       props.setImages(updatedImages);
       setIsEditingName(false);
     } catch (err) {
-      setError("Failed to update image name. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to update image name. Please try again."
+      );
       console.error("Error updating image name:", err);
     } finally {
       setIsLoading(false);
