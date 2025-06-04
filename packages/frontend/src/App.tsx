@@ -7,31 +7,47 @@ import { MainLayout } from "./MainLayout.tsx";
 import { ValidRoutes } from "csc437-monorepo-backend/src/shared/ValidRoutes";
 import { useState, useEffect } from "react";
 import type { IApiImageData } from "csc437-monorepo-backend/src/common/ApiImageData";
+import { ImageSearchForm } from "./images/ImageSearchForm.tsx";
 
 function App() {
   const [imageData, setImageData] = useState<IApiImageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [searchString, handleImageSearch] = useState("");
+
+  const fetchImages = async (searchQuery?: string) => {
+    setIsLoading(true);
+    setHasError(false);
+
+    try {
+      const url = searchQuery
+        ? `/api/images/search?q=${encodeURIComponent(searchQuery)}`
+        : "/api/images";
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setImageData(data);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      setHasError(true);
+      setImageData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const response = await fetch("/api/images");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setImageData(data);
-      } catch (error) {
-        console.error("Error fetching images:", error);
-        setHasError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchImages();
   }, []);
+
+  const handleSearchRequested = () => {
+    fetchImages(searchString);
+  };
 
   return (
     <Routes>
@@ -43,6 +59,13 @@ function App() {
               images={imageData}
               isLoading={isLoading}
               hasError={hasError}
+              searchPanel={
+                <ImageSearchForm
+                  searchString={searchString}
+                  onSearchStringChange={handleImageSearch}
+                  onSearchRequested={handleSearchRequested}
+                />
+              }
             />
           }
         />

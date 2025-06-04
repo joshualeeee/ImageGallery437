@@ -1,13 +1,20 @@
 import { ImageGrid } from "./ImageGrid.tsx";
 import type { IApiImageData } from "csc437-monorepo-backend/src/common/ApiImageData";
+import React from "react";
 
 interface AllImagesProps {
   images: IApiImageData[];
   isLoading: boolean;
   hasError: boolean;
+  searchPanel: React.ReactNode;
 }
 
-export function AllImages({ images, isLoading, hasError }: AllImagesProps) {
+export function AllImages({
+  images,
+  isLoading,
+  hasError,
+  searchPanel,
+}: AllImagesProps) {
   if (isLoading) {
     return (
       <>
@@ -31,6 +38,7 @@ export function AllImages({ images, isLoading, hasError }: AllImagesProps) {
   return (
     <>
       <h2>All Images</h2>
+      {searchPanel}
       <ImageGrid images={images} />
     </>
   );
