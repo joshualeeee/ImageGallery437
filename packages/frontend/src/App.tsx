@@ -89,7 +89,11 @@ function App() {
           element={<ImageDetails images={imageData} setImages={setImageData} />}
         />
         <Route path={ValidRoutes.UPLOAD} element={<UploadPage />} />
-        <Route path={ValidRoutes.LOGIN} element={<LoginPage />} />
+        <Route
+          path={ValidRoutes.LOGIN}
+          element={<LoginPage isRegistering={false} />}
+        />
+        <Route path="/register" element={<LoginPage isRegistering={true} />} />
       </Route>
     </Routes>
   );
