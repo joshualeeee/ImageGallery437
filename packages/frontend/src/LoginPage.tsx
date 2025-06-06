@@ -4,6 +4,7 @@ import "./LoginPage.css";
 
 interface LoginPageProps {
   isRegistering?: boolean;
+  onAuth: (token: string) => void;
 }
 
 interface ActionResult {
@@ -12,7 +13,7 @@ interface ActionResult {
   token?: string;
 }
 
-export function LoginPage({ isRegistering = false }: LoginPageProps) {
+export function LoginPage({ isRegistering = false, onAuth }: LoginPageProps) {
   const usernameInputId = React.useId();
   const passwordInputId = React.useId();
 
@@ -27,17 +28,13 @@ export function LoginPage({ isRegistering = false }: LoginPageProps) {
 
       try {
         const endpoint = isRegistering ? "/auth/register" : "/auth/login";
-
-        const requestBody = JSON.stringify({ username, password });
-
         const response = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: requestBody,
+          body: JSON.stringify({ username, password }),
         });
-
 
         if (!response.ok) {
           return {
@@ -49,10 +46,9 @@ export function LoginPage({ isRegistering = false }: LoginPageProps) {
         }
 
         const data = await response.json();
-        console.log("Success response:", data);
 
         if (data.token) {
-          console.log("Auth token:", data.token);
+          onAuth(data.token);
         }
 
         return {
