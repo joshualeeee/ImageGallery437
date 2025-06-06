@@ -1,22 +1,116 @@
-import React from "react";
+import React, { useActionState } from "react";
+import { Link } from "react-router";
 import "./LoginPage.css";
 
-export function LoginPage() {
+interface LoginPageProps {
+  isRegistering?: boolean;
+}
+
+interface ActionResult {
+  type: "success" | "error";
+  message: string;
+  token?: string;
+}
+
+export function LoginPage({ isRegistering = false }: LoginPageProps) {
   const usernameInputId = React.useId();
   const passwordInputId = React.useId();
 
+  const [result, submitAction, isPending] = useActionState<ActionResult | null>(
+    async () => {
+      const form = document.querySelector("form") as HTMLFormElement;
+      const formData = new FormData(form);
+      const username = formData.get("username") as string;
+      const password = formData.get("password") as string;
+
+      console.log("Form data:", { username, password });
+
+      try {
+        const endpoint = isRegistering ? "/auth/register" : "/auth/login";
+
+        const requestBody = JSON.stringify({ username, password });
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: requestBody,
+        });
+
+
+        if (!response.ok) {
+          return {
+            type: "error",
+            message: isRegistering
+              ? "Failed to create account"
+              : "Failed to login",
+          };
+        }
+
+        const data = await response.json();
+        console.log("Success response:", data);
+
+        if (data.token) {
+          console.log("Auth token:", data.token);
+        }
+
+        return {
+          type: "success",
+          message: isRegistering
+            ? "Account created successfully!"
+            : "Login successful!",
+          token: data.token,
+        };
+      } catch (error) {
+        console.error("Network error:", error);
+        return {
+          type: "error",
+          message: "Failed to connect to server",
+        };
+      }
+    },
+    null
+  );
+
   return (
     <>
-      <h2>Login</h2>
-      <form className="LoginPage-form">
+      <h2>{isRegistering ? "Register a new account" : "Login"}</h2>
+      {result && (
+        <p className={`LoginPage-message ${result.type}`} aria-live="polite">
+          {result.message}
+        </p>
+      )}
+      {isPending && <p className="LoginPage-message loading">Loading...</p>}
+      <form className="LoginPage-form" action={submitAction}>
         <label htmlFor={usernameInputId}>Username</label>
-        <input id={usernameInputId} />
+        <input
+          id={usernameInputId}
+          name="username"
+          required
+          disabled={isPending}
+        />
 
         <label htmlFor={passwordInputId}>Password</label>
-        <input id={passwordInputId} type="password" />
+        <input
+          id={passwordInputId}
+          name="password"
+          type="password"
+          required
+          disabled={isPending}
+        />
 
-        <input type="submit" value="Submit" />
+        <input
+          type="submit"
+          value={isRegistering ? "Register" : "Login"}
+          disabled={isPending}
+        />
       </form>
+      {!isRegistering && (
+        <p className="LoginPage-register-link">
+          Don't have an account? <Link to="/register">Register here</Link>
+        </p>
+      )}
     </>
   );
 }
