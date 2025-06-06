@@ -2,7 +2,7 @@ import { AllImages } from "./images/AllImages.tsx";
 import { ImageDetails } from "./images/ImageDetails.tsx";
 import { UploadPage } from "./UploadPage.tsx";
 import { LoginPage } from "./LoginPage.tsx";
-import { Routes, Route } from "react-router";
+import { Routes, Route, useNavigate } from "react-router";
 import { MainLayout } from "./MainLayout.tsx";
 import { ValidRoutes } from "csc437-monorepo-backend/src/shared/ValidRoutes";
 import { useState, useEffect, useRef } from "react";
@@ -15,6 +15,8 @@ function App() {
   const [hasError, setHasError] = useState(false);
   const [searchString, handleImageSearch] = useState("");
   const requestCounterRef = useRef(0);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchImages = async (searchQuery?: string) => {
     setIsLoading(true);
@@ -29,7 +31,11 @@ function App() {
         ? `/api/images/search?q=${encodeURIComponent(searchQuery)}`
         : "/api/images";
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -57,11 +63,18 @@ function App() {
   };
 
   useEffect(() => {
-    fetchImages();
-  }, []);
+    if (authToken) {
+      fetchImages();
+    }
+  }, [authToken]);
 
   const handleSearchRequested = () => {
     fetchImages(searchString);
+  };
+
+  const handleAuth = (token: string) => {
+    setAuthToken(token);
+    navigate("/");
   };
 
   return (
@@ -91,9 +104,12 @@ function App() {
         <Route path={ValidRoutes.UPLOAD} element={<UploadPage />} />
         <Route
           path={ValidRoutes.LOGIN}
-          element={<LoginPage isRegistering={false} />}
+          element={<LoginPage isRegistering={false} onAuth={handleAuth} />}
         />
-        <Route path="/register" element={<LoginPage isRegistering={true} />} />
+        <Route
+          path={ValidRoutes.REGISTER}
+          element={<LoginPage isRegistering={true} onAuth={handleAuth} />}
+        />
       </Route>
     </Routes>
   );
