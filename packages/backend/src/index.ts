@@ -23,10 +23,10 @@ const app = express();
 // Store JWT_SECRET in app.locals
 app.locals.JWT_SECRET = JWT_SECRET;
 
-app.use(express.static(STATIC_DIR));
 app.use(express.json());
+app.use(express.static(STATIC_DIR));
 
-// Register image routes directly on the app
+// Register routes
 registerAuthRoutes(app, mongoClient);
 app.use("/api/*", verifyAuthToken);
 registerImageRoutes(app, imageProvider);
