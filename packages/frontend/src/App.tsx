@@ -5,7 +5,7 @@ import { LoginPage } from "./LoginPage.tsx";
 import { Routes, Route } from "react-router";
 import { MainLayout } from "./MainLayout.tsx";
 import { ValidRoutes } from "csc437-monorepo-backend/src/shared/ValidRoutes";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { IApiImageData } from "csc437-monorepo-backend/src/common/ApiImageData";
 import { ImageSearchForm } from "./images/ImageSearchForm.tsx";
 
@@ -14,10 +14,15 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [searchString, handleImageSearch] = useState("");
+  const requestCounterRef = useRef(0);
 
   const fetchImages = async (searchQuery?: string) => {
     setIsLoading(true);
     setHasError(false);
+
+    // Increment the counter and save this request's number
+    requestCounterRef.current += 1;
+    const thisRequestNumber = requestCounterRef.current;
 
     try {
       const url = searchQuery
@@ -31,13 +36,23 @@ function App() {
       }
 
       const data = await response.json();
-      setImageData(data);
+
+      // Only update state if this is still the most recent request
+      if (thisRequestNumber === requestCounterRef.current) {
+        setImageData(data);
+      }
     } catch (error) {
       console.error("Error fetching images:", error);
-      setHasError(true);
-      setImageData([]);
+      // Only update error state if this is still the most recent request
+      if (thisRequestNumber === requestCounterRef.current) {
+        setHasError(true);
+        setImageData([]);
+      }
     } finally {
-      setIsLoading(false);
+      // Only update loading state if this is still the most recent request
+      if (thisRequestNumber === requestCounterRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
