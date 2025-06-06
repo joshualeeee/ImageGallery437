@@ -63,7 +63,20 @@ export class ImageProvider {
         }));
     }
 
-    async updateImageName(imageId: string, newName: string): Promise<number> {
+    async updateImageName(imageId: string, newName: string, username: string): Promise<number> {
+        // First get the image to check ownership
+        const image = await this.imageCollection.findOne({ _id: new ObjectId(imageId) });
+        if (!image) {
+            return 0; // Image not found
+        }
+
+        // Get the author's username
+        const author = await this.userCollection.findOne({ _id: image.authorId });
+        if (!author || author.username !== username) {
+            return -1; // Not authorized
+        }
+
+        // If authorized, update the name
         const filter: Filter<IImageDocument> = { _id: new ObjectId(imageId) };
         const result = await this.imageCollection.updateOne(
             filter,
@@ -74,7 +87,6 @@ export class ImageProvider {
                 }
             }
         );
-        console.log('Return: ', result.matchedCount);
         return result.matchedCount;
     }
 }

@@ -44,3 +44,34 @@ Content-Type: application/json
 {
     "name": "Valid Name"
 }
+
+### New user registration
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{ "username": "chunkylover23", "password": "password" }
+
+
+### Login to get token
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "username": "hi", "password": "password" }
+
+### Get all images (with auth)
+GET http://localhost:3000/api/images
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImhpIiwiaWF0IjoxNzQ5MjQxMDgyLCJleHAiOjE3NDkzMjc0ODJ9.sr0kS0-WIWHBKMQGa7c2rZDHgOfh59nZ1mSh3dF7BPg
+
+### Search images by name (with auth)
+GET http://localhost:3000/api/images/search?q=cat
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImhpIiwiaWF0IjoxNzQ5MjQxMDgyLCJleHAiOjE3NDkzMjc0ODJ9.sr0kS0-WIWHBKMQGa7c2rZDHgOfh59nZ1mSh3dF7BPg
+Accept: application/json
+
+### Update image name (with auth)
+PUT http://localhost:3000/api/images/683a00521ee8573c5a27834e
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNodW5reWxvdmVyMjMiLCJpYXQiOjE3NDkyNDEzMzcsImV4cCI6MTc0OTMyNzczN30.Gk8c-VVHKdSKKmTR-_S_HLWogWhPowkjf9AwmBKLEHM
+Content-Type: application/json
+
+{
+    "name": "Shiba!!"
+}

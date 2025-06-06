@@ -30,6 +30,15 @@ export function registerImageRoutes(app: express.Application, imageProvider: Ima
         try {
             const { imageId } = req.params;
             const { name } = req.body;
+            const username = req.user?.username; // Get username from JWT token
+
+            if (!username) {
+                res.status(401).json({
+                    error: "Unauthorized",
+                    message: "Authentication required"
+                });
+                return;
+            }
 
             // Check if name is provided
             if (!name) {
@@ -58,10 +67,17 @@ export function registerImageRoutes(app: express.Application, imageProvider: Ima
                 return;
             }
             
-            console.log('Search query:', name, imageId);
-            const matchedCount = await imageProvider.updateImageName(imageId, name);
+            const result = await imageProvider.updateImageName(imageId, name, username);
             
-            if (matchedCount === 0) {
+            if (result === -1) {
+                res.status(403).json({
+                    error: "Forbidden",
+                    message: "You are not authorized to modify this image"
+                });
+                return;
+            }
+            
+            if (result === 0) {
                 res.status(404).json({
                     error: "Not Found",
                     message: "Image does not exist"
