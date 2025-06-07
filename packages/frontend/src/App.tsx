@@ -8,6 +8,7 @@ import { ValidRoutes } from "csc437-monorepo-backend/src/shared/ValidRoutes";
 import { useState, useEffect, useRef } from "react";
 import type { IApiImageData } from "csc437-monorepo-backend/src/common/ApiImageData";
 import { ImageSearchForm } from "./images/ImageSearchForm.tsx";
+import { ProtectedRoute } from "./ProtectedRoute.tsx";
 
 function App() {
   const [imageData, setImageData] = useState<IApiImageData[]>([]);
@@ -83,25 +84,42 @@ function App() {
         <Route
           path={ValidRoutes.HOME}
           element={
-            <AllImages
-              images={imageData}
-              isLoading={isLoading}
-              hasError={hasError}
-              searchPanel={
-                <ImageSearchForm
-                  searchString={searchString}
-                  onSearchStringChange={handleImageSearch}
-                  onSearchRequested={handleSearchRequested}
-                />
-              }
-            />
+            <ProtectedRoute authToken={authToken || ""}>
+              <AllImages
+                images={imageData}
+                isLoading={isLoading}
+                hasError={hasError}
+                searchPanel={
+                  <ImageSearchForm
+                    searchString={searchString}
+                    onSearchStringChange={handleImageSearch}
+                    onSearchRequested={handleSearchRequested}
+                  />
+                }
+              />
+            </ProtectedRoute>
           }
         />
         <Route
           path={ValidRoutes.IMAGE_DETAILS}
-          element={<ImageDetails images={imageData} setImages={setImageData} />}
+          element={
+            <ProtectedRoute authToken={authToken || ""}>
+              <ImageDetails
+                images={imageData}
+                setImages={setImageData}
+                authToken={authToken || ""}
+              />
+            </ProtectedRoute>
+          }
         />
-        <Route path={ValidRoutes.UPLOAD} element={<UploadPage />} />
+        <Route
+          path={ValidRoutes.UPLOAD}
+          element={
+            <ProtectedRoute authToken={authToken || ""}>
+              <UploadPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path={ValidRoutes.LOGIN}
           element={<LoginPage isRegistering={false} onAuth={handleAuth} />}

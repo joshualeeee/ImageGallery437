@@ -5,9 +5,14 @@ import { ImageNameEditor } from "./ImageNameEditor";
 interface ImageDetailsProps {
   images: IApiImageData[];
   setImages: (images: IApiImageData[]) => void;
+  authToken: string;
 }
 
-export function ImageDetails({ images, setImages }: ImageDetailsProps) {
+export function ImageDetails({
+  images,
+  setImages,
+  authToken,
+}: ImageDetailsProps) {
   const { imageId } = useParams();
   const image = images.find((image) => image.id === imageId);
   if (!image) {
@@ -26,6 +31,7 @@ export function ImageDetails({ images, setImages }: ImageDetailsProps) {
         imageId={image.id}
         images={images}
         setImages={setImages}
+        authToken={authToken}
       />
       <p>By {image.author.username}</p>
       <img className="ImageDetails-img" src={image.src} alt={image.name} />
