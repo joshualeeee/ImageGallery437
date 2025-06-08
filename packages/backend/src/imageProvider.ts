@@ -89,4 +89,42 @@ export class ImageProvider {
         );
         return result.matchedCount;
     }
+
+    async createImage(
+        src: string,
+        name: string,
+        author: string
+    ): Promise<void> {
+        try {
+            console.log("Creating image document:", { src, name, author });
+            
+            // First get the user's ID from their username
+            console.log("Looking up user in collection:", this.userCollection.collectionName);
+            const user = await this.userCollection.findOne({ username: author });
+            console.log("User lookup result:", user);
+            
+            if (!user) {
+                console.error("User not found:", author);
+                throw new Error(`User not found: ${author}`);
+            }
+
+            console.log("Found user:", { userId: user._id, username: user.username });
+
+            const now = new Date();
+            const imageDoc: IImageDocument = {
+                src,
+                name,
+                authorId: user._id,
+                createdAt: now,
+                updatedAt: now
+            };
+
+            console.log("Inserting image document:", imageDoc);
+            const result = await this.imageCollection.insertOne(imageDoc);
+            console.log("Image document inserted:", result.insertedId);
+        } catch (error) {
+            console.error("Error in createImage:", error);
+            throw error; // Re-throw to be handled by the route
+        }
+    }
 }
