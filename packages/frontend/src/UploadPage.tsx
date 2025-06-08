@@ -17,7 +17,6 @@ function readAsDataURL(file: File): Promise<string> {
 export function UploadPage() {
   const imageUploadId = useId();
   const imageTitleId = useId();
-
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,25 +31,38 @@ export function UploadPage() {
     async () => {
       const form = document.querySelector("form") as HTMLFormElement;
       const formData = new FormData(form);
-
       try {
+        const authToken = localStorage.getItem("authToken");
+        console.log("Auth token present:", !!authToken);
+
         const response = await fetch("/api/images", {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
           body: formData,
         });
 
+
         if (!response.ok) {
-          throw new Error("Upload failed");
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Upload failed:", errorData);
+          throw new Error(
+            errorData.message || `Upload failed with status ${response.status}`
+          );
         }
 
+        console.log("Upload successful");
         return {
           type: "success",
           message: "Image uploaded successfully",
         };
       } catch (error) {
+        console.error("Upload error:", error);
         return {
           type: "error",
-          message: "Failed to upload image",
+          message:
+            error instanceof Error ? error.message : "Failed to upload image",
         };
       }
     },
@@ -85,18 +97,26 @@ export function UploadPage() {
         </div>
 
         <div>
-          {" "}
-          {/* Preview img element */}
-          <img
-            style={{ width: "20em", maxWidth: "100%" }}
-            src={previewUrl}
-            alt=""
-          />
+          {previewUrl && (
+            <img
+              style={{ width: "20em", maxWidth: "100%" }}
+              src={previewUrl}
+              alt="Preview"
+            />
+          )}
         </div>
 
         <input type="submit" value="Confirm upload" disabled={isPending} />
       </form>
-      <div aria-live="polite">{result?.message}</div>
+      <div
+        aria-live="polite"
+        style={{
+          marginTop: "1em",
+          color: result?.type === "error" ? "red" : "green",
+        }}
+      >
+        {result?.message}
+      </div>
     </>
   );
 }
