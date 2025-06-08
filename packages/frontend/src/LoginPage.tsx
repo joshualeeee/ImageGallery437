@@ -48,6 +48,7 @@ export function LoginPage({ isRegistering = false, onAuth }: LoginPageProps) {
         const data = await response.json();
 
         if (data.token) {
+          localStorage.setItem("authToken", data.token);
           onAuth(data.token);
         }
 
