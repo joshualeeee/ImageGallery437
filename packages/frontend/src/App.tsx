@@ -16,7 +16,9 @@ function App() {
   const [hasError, setHasError] = useState(false);
   const [searchString, handleImageSearch] = useState("");
   const requestCounterRef = useRef(0);
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(() =>
+    localStorage.getItem("authToken")
+  );
   const navigate = useNavigate();
 
   const fetchImages = async (searchQuery?: string) => {
