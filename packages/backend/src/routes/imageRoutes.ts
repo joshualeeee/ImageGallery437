@@ -1,6 +1,9 @@
 import express from "express";
 import { ImageProvider } from "../imageProvider";
 import { ObjectId } from "mongodb";
+import type { Request, Response, NextFunction } from "express";
+import { imageMiddlewareFactory, handleImageFileErrors } from "../imageUploadMiddleware";
+
 
 const MAX_NAME_LENGTH = 100;
 
@@ -25,6 +28,52 @@ export function registerImageRoutes(app: express.Application, imageProvider: Ima
             next(error);
         }
     });
+
+    app.post(
+        "/api/images",
+        imageMiddlewareFactory.single("image"),
+        handleImageFileErrors,
+        async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const file = req.file;
+                const name = req.body.name;
+                const author = req.user?.username;
+
+                console.log("Upload request received:", {
+                    file: file ? {
+                        filename: file.filename,
+                        mimetype: file.mimetype,
+                        size: file.size
+                    } : null,
+                    name,
+                    author
+                });
+
+                if (!file || !name || !author) {
+                    res.status(400).json({
+                        error: "Bad Request",
+                        message: "File, name, and authentication are required"
+                    });
+                    return;
+                }
+    
+                // Create the image document
+                await imageProvider.createImage(
+                    `/uploads/${file.filename}`, // Use the filename from multer
+                    name,
+                    author
+                );
+    
+                res.status(201).send();
+            } catch (error) {
+                console.error("Error in image upload:", error);
+                res.status(500).json({
+                    error: "Internal Server Error",
+                    message: error instanceof Error ? error.message : "An unexpected error occurred"
+                });
+            }
+        }
+    );
 
     app.put("/api/images/:imageId", async (req, res, next) => {
         try {
