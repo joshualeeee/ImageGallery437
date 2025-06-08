@@ -25,6 +25,11 @@ app.locals.JWT_SECRET = JWT_SECRET;
 
 app.use(express.json());
 app.use(express.static(STATIC_DIR));
+const upload_dir = process.env.IMAGE_UPLOAD_DIR
+if (!upload_dir){
+    throw new Error("Missing updload_dir from environment variables");
+}
+app.use("/uploads", express.static(upload_dir))
 
 // Register routes
 registerAuthRoutes(app, mongoClient);
